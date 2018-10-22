@@ -1,0 +1,26 @@
+##请编辑velocity模板
+#if(${context.moduleName})
+	#set($modulName=".${context.moduleName}")
+    #set($requestMappingVal="${context.moduleName}/${context.javaBeanNameLower}")
+#else
+	#set($moduleName="")
+    #set($requestMappingVal="${context.javaBeanNameLower}")
+#end
+package ${context.packageName}${modulName}.service;
+
+import org.springframework.stereotype.Service;
+
+import ${context.packageName}${modulName}.persistence.dto.${context.javaBeanName};
+import ${context.packageName}.common.base.service.BaseService;
+
+/**
+ * ${context.tableDefinition.comment}Service
+ * 
+ * @author : ${context.currentSysUserName}
+ * @version : 1.0
+ * @since : ${context.currentTimeStampStr}
+ */
+@Service
+public class ${context.javaBeanName}Service extends BaseService<${context.javaBeanName}> {
+
+}

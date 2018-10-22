@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+	<properties resource="generator-config.properties" />
+	<context id="tbdas-ms" targetRuntime="MyBatis3Simple" defaultModelType="flat">
+		<!-- ###############代码生成配置############## -->
+		<!-- 基础包名 如 com.cfcc.tfiep -->
+		<property name="basePackageName" value="${generator.basePackageName}" />
+		<!-- 文件编码 默认为UTF-8 -->
+		<property name="defaultCharset" value="${generator.defaultCharset}" />
+		<!-- 
+			模块名，如为空则默认为表名. 模块名一般需要结合包名使用，
+			如基础包名为[com.cfcc.tfiep]， 模块名为 [param]，Java类名为[TestService.java]，
+			则位置最终为com.cfcc.tfiep.service.param.TestService.java 
+		-->
+		<property name="moduleName" value="${generator.moduleName}" />
+		<!-- 是否生成Controller 默认true -->
+		<property name="enableGenerateController" value="true" />
+		<!-- 是否生成Service 默认true -->
+		<property name="enableGenerateService" value="true" />
+		<!-- 是否生成Jsp 默认true -->
+		<property name="enableGenerateJsp" value="true" />
+
+
+		<!-- plugin -->
+		<plugin type="org.mybatis.generator.plugins.SerializablePlugin" />
+		<plugin type="org.mybatis.generator.plugins.ToStringPlugin" />
+		<plugin type="org.mybatis.generator.plugins.EqualsHashCodePlugin" />
+
+		<plugin type="tk.mybatis.mapper.generator.MapperPlugin">
+			<property name="mappers" value="com.cfcc.tbdas.common.base.mybatis.BaseMapper" />
+			<!-- caseSensitive默认false，当数据库表名区分大小写时，可以将该属性设置为true -->
+			<!-- <property name="caseSensitive" value="true" /> -->
+		</plugin>
+		
+		<!-- <commentGenerator>
+			<property name="suppressDate" value="true" />
+			<property name="suppressAllComments" value="true" />
+		</commentGenerator> -->
+
+		<jdbcConnection driverClass="${generator.jdbcConnection.driverClass}" 
+						connectionURL="${generator.jdbcConnection.connectionURL}"
+						userId="${generator.jdbcConnection.userId}" 
+						password="${generator.jdbcConnection.password}">
+		</jdbcConnection>
+
+		<!-- 默认false，把JDBC DECIMAL 和 NUMERIC 类型解析为 Integer，为 true时把JDBC DECIMAL 和 NUMERIC 类型解析为java.math.BigDecimal -->
+		<javaTypeResolver>
+			<property name="forceBigDecimals" value="false" />
+		</javaTypeResolver>
+
+		<javaModelGenerator targetPackage="${generator.ms.dto.targetPackage}" targetProject=".\gen_java_ms_src">
+			<!-- enableSubPackages:是否让schema作为包的后缀 -->
+			<property name="enableSubPackages" value="false" />
+			<!-- 从数据库返回的值被清理前后的空格 -->
+			<property name="trimStrings" value="true" />
+		</javaModelGenerator>
+
+		<!-- java_Mapper_Xml 如果需要自定义mapper或者手写Sql，则打开次配置，并将生成的mapper的Xml文件拷贝到项目中进行修改-->
+		<sqlMapGenerator targetPackage="mybatis.mappers" targetProject=".\gen_mapper_xml">
+			<property name="enableSubPackages" value="false" />
+		</sqlMapGenerator>
+
+		<!-- java_Mapper -->
+		<javaClientGenerator targetPackage="${generator.ms.mapper.targetPackage}" targetProject=".\gen_java_ms_src" type="XMLMAPPER">
+			<!-- enableSubPackages:是否让schema作为包的后缀 -->
+			<property name="enableSubPackages" value="false" />
+		</javaClientGenerator>
+
+		<!-- 针对哪些表进行生成，tableName属性支持模糊匹配 如% -->
+		<table tableName="${generator.table.tableName}" />
+	</context>
+	
+	<context id="tbdas-web" targetRuntime="MyBatis3Simple" defaultModelType="flat">
+		<!-- ###############代码生成配置############## -->
+		<!-- 基础包名 如 com.cfcc.tfiep -->
+		<property name="basePackageName" value="${generator.basePackageName}" />
+		<!-- 文件编码 默认为UTF-8 -->
+		<property name="defaultCharset" value="${generator.defaultCharset}" />
+		<!-- 
+			模块名，如为空则默认为表名. 模块名一般需要结合包名使用，
+			如基础包名为[com.cfcc.tfiep]， 模块名为 [param]，Java类名为[TestService.java]，
+			则位置最终为com.cfcc.tfiep.service.param.TestService.java 
+		-->
+		<property name="moduleName" value="${generator.moduleName}" />
+		<!-- 是否生成Controller 默认true -->
+		<property name="enableGenerateController" value="true" />
+		<!-- 是否生成Service 默认true -->
+		<property name="enableGenerateService" value="true" />
+		<!-- 是否生成Jsp 默认true -->
+		<property name="enableGenerateJsp" value="true" />
+		<!-- plugin -->
+		<plugin type="org.mybatis.generator.plugins.SerializablePlugin" />
+		<plugin type="org.mybatis.generator.plugins.ToStringPlugin" />
+		<plugin type="org.mybatis.generator.plugins.EqualsHashCodePlugin" />
+
+		<plugin type="tk.mybatis.mapper.generator.MapperPlugin">
+			<property name="mappers" value="com.cfcc.tbdas.common.base.mybatis.BaseMapper" />
+			<!-- caseSensitive默认false，当数据库表名区分大小写时，可以将该属性设置为true -->
+			<!-- <property name="caseSensitive" value="true" /> -->
+		</plugin>
+		
+		<jdbcConnection driverClass="${generator.jdbcConnection.driverClass}" 
+						connectionURL="${generator.jdbcConnection.connectionURL}"
+						userId="${generator.jdbcConnection.userId}" 
+						password="${generator.jdbcConnection.password}">
+		</jdbcConnection>
+
+		<!-- 默认false，把JDBC DECIMAL 和 NUMERIC 类型解析为 Integer，为 true时把JDBC DECIMAL 和 NUMERIC 类型解析为java.math.BigDecimal -->
+		<javaTypeResolver>
+			<property name="forceBigDecimals" value="false" />
+		</javaTypeResolver>
+		
+		<javaModelGenerator targetPackage="${generator.web.dto.targetPackage}" targetProject=".\gen_java_web_src">
+			<!-- enableSubPackages:是否让schema作为包的后缀 -->
+			<property name="enableSubPackages" value="false" />
+			<!-- 从数据库返回的值被清理前后的空格 -->
+			<property name="trimStrings" value="true" />
+		</javaModelGenerator>
+		
+		<!-- 针对哪些表进行生成，tableName属性支持模糊匹配 如% -->
+		<table tableName="${generator.table.tableName}">
+			<generatedKey column="id" sqlStatement="DB2" identity="true" />
+		</table>
+	</context>
+</generatorConfiguration>

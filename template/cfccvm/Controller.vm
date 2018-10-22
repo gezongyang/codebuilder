@@ -1,0 +1,198 @@
+##请编辑velocity模板
+#if(${context.moduleName})
+	#set($modulName=".${context.moduleName}")
+    #set($requestMappingVal="${context.moduleName}/${context.javaBeanNameLower}")
+#else
+	#set($moduleName="")
+    #set($requestMappingVal="${context.javaBeanNameLower}")
+#end
+package ${context.packageName}.web${modulName}.controller;
+
+import java.net.URI;
+import java.util.*;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import ${context.packageName}.web${modulName}.persistence.dto.${context.javaBeanName};
+import ${context.packageName}.web.base.controller.BaseController;
+import ${context.packageName}.web.base.helper.MsBizModuleEnum;
+import ${context.packageName}.web.base.vo.EasyUIDatagridParam;
+import ${context.packageName}.web.base.vo.EasyUIDatagridResult;
+import ${context.packageName}.web.common.exception.TbdasSystemRuntimeException;
+import ${context.packageName}.web.common.utils.WebUtils;
+
+/**
+ * ${context.tableDefinition.comment}Controller[前端]
+ * 
+ * <p>TODO 代码生成提示：请将访问地址替换为正确的地址，或到MsBizModuleEnum中增加相应配置!</p>
+ *
+ * @author : ${context.currentSysUserName}
+ * @version : 1.0
+ * @since : ${context.currentTimeStampStr}
+ */
+@Controller
+@RequestMapping("${requestMappingVal}")
+public class ${context.javaBeanName}Controller extends BaseController {
+    
+	/**
+	 * 默认页面
+	 */
+    @RequestMapping(method = RequestMethod.GET)
+	public String listPage(Model model) {
+		model.addAttribute("org", getCurrentOrg());
+		return "${requestMappingVal}_list";
+	}
+	
+	/**
+	 * 获取数据列表
+	 */
+	@RequestMapping(value = "json", method = RequestMethod.GET)
+	@ResponseBody
+	public EasyUIDatagridResult getPageList(EasyUIDatagridParam param, HttpServletRequest request) {
+		ResponseEntity<EasyUIDatagridResult> responseEntity = restTemplate.getForEntity(
+				msUrlHelper.getAccessUrl(MsBizModuleEnum.${context.upperModuleName}_${context.upperJavaBeanName}) + "json?" + //
+						WebUtils.getEasyUIQueryString(param, request), //
+				EasyUIDatagridResult.class);
+		return responseEntity.getBody();
+	}
+	
+	/**
+	 * 获取全部数据列表
+	 */
+	@SuppressWarnings("rawtypes")
+	@RequestMapping(value = "all", method = RequestMethod.GET)
+	@ResponseBody
+	public List getAllList(EasyUIDatagridParam param, HttpServletRequest request) {
+		ResponseEntity<EasyUIDatagridResult> responseEntity = restTemplate.getForEntity(
+				msUrlHelper.getAccessUrl(MsBizModuleEnum.${context.upperModuleName}_${context.upperJavaBeanName}) + "all?" + //
+						WebUtils.getEasyUIQueryString(param, request), //
+				EasyUIDatagridResult.class);
+		EasyUIDatagridResult resultBody = responseEntity.getBody();
+		if(resultBody != null && resultBody.getTotal() > 0) {
+			return resultBody.getRows();
+		}
+		return Collections.emptyList();
+	}
+    
+	/**
+	 * 添加页面
+	 */
+	@RequiresPermissions("${context.moduleName}:${context.javaBeanNameLower}:add")
+    @RequestMapping(value = "create", method = RequestMethod.GET)
+	public String createPage(Model model) {
+		model.addAttribute("entityObj", new ${context.javaBeanName}());
+		model.addAttribute("action", "create");
+		model.addAttribute("org", getCurrentOrg());
+		return "${requestMappingVal}_form";
+	}
+    
+	/**
+	 * 添加
+	 */
+	@RequiresPermissions("${context.moduleName}:${context.javaBeanNameLower}:add")
+    @RequestMapping(value = "create", method = RequestMethod.POST)
+	@ResponseBody
+	public String create(${context.javaBeanName} ${context.javaBeanNameLF}, Model model) {
+		ResponseEntity<String> responseEntity = restTemplate.postForEntity(
+				URI.create(msUrlHelper.getAccessUrl(MsBizModuleEnum.${context.upperModuleName}_${context.upperJavaBeanName}) + "create"), //
+				${context.javaBeanNameLF}, //
+				String.class);
+		String result = responseEntity.getBody();
+		if (result == "fail") {
+			logger.info("添加信息失败，后端添加失败!");
+		}
+		return result;
+	}
+	
+	#if($context.isMultiPk)
+		#set($baseUpdateUrl="update")
+		#set($baseUpdateParam='')
+		#foreach($column in $columns)
+				#if($column.isPk)
+					#set($baseUpdateUrl=$baseUpdateUrl+"/{${column.javaFieldName}}")
+					#set($baseUpdateParam=$baseUpdateParam+"+"+'"/"'+"+"+"${context.javaBeanNameLF}.get${column.javaCameFieldName}()")
+				#end
+		#end
+	#else
+		#set($baseUpdateUrl="update/{${context.javaPkName}}")
+	#end
+    
+	/**
+	 * 更新页面
+	 */
+	@RequiresPermissions("${context.moduleName}:${context.javaBeanNameLower}:update")
+	@RequestMapping(value = "${baseUpdateUrl}", method = RequestMethod.GET)
+	public String updatePage(#if($context.isMultiPk)${context.javaBeanName} ${context.javaBeanNameLF}#else @PathVariable("${context.javaPkName}") ${context.javaPkBoxType} ${context.javaPkName} #end ,Model model) {
+		ResponseEntity<${context.javaBeanName}> responseEntity = restTemplate.getForEntity(
+				URI.create(msUrlHelper.getAccessUrl(MsBizModuleEnum.${context.upperModuleName}_${context.upperJavaBeanName}) + "get" #if($context.isMultiPk)$baseUpdateParam #else + "/" + ${context.javaPkName}#end), //
+				${context.javaBeanName}.class);
+		model.addAttribute("entityObj", responseEntity.getBody());
+		model.addAttribute("action", "update");
+		return "${requestMappingVal}_form";
+	}
+    
+	/**
+	 * 更新
+	 */
+	@RequiresPermissions("${context.moduleName}:${context.javaBeanNameLower}:update")
+    @RequestMapping(value = "update", method = RequestMethod.POST)
+	@ResponseBody
+	public String update(@ModelAttribute @RequestBody ${context.javaBeanName} ${context.javaBeanNameLF}, Model model) {
+		if (${context.javaBeanNameLF} == null || ${context.javaBeanNameLF}.get${context.javaPkNameUpperFirstLetter}() == null) {
+			return "fail";
+		}
+		ResponseEntity<String> responseEntity = restTemplate.postForEntity(
+				URI.create(msUrlHelper.getAccessUrl(MsBizModuleEnum.${context.upperModuleName}_${context.upperJavaBeanName}) + "update"), //
+				${context.javaBeanNameLF}, //
+				String.class);
+		String result = responseEntity.getBody();
+		if (result == "fail") {
+			logger.info("修改信息失败，后端修改失败!");
+		}
+		return result;
+	}
+    
+	#if($context.isMultiPk)
+		#set($baseDeleteUrl="delete")
+		#set($baseDeleteParam='')
+		#foreach($column in $columns)
+				#if($column.isPk)
+					#set($baseDeleteUrl=$baseDeleteUrl+"/{${column.javaFieldName}}")
+					#set($baseDeleteParam=$baseDeleteParam+"+"+'"/"'+"+"+"${context.javaBeanNameLF}.get${column.javaCameFieldName}()")
+				#end
+		#end
+	#else
+		#set($baseDeleteUrl="delete/{${context.javaPkName}}")
+	#end
+	/**
+	 * 删除
+	 */
+	@RequiresPermissions("${context.moduleName}:${context.javaBeanNameLower}:delete")
+	@RequestMapping(value = "$baseDeleteUrl")
+	@ResponseBody
+	public String delete(#if($context.isMultiPk)${context.javaBeanName} ${context.javaBeanNameLF}#else @PathVariable("${context.javaPkName}") ${context.javaPkBoxType} ${context.javaPkName} #end) {
+		ResponseEntity<String> responseEntity = restTemplate.postForEntity(
+				URI.create(msUrlHelper.getAccessUrl(MsBizModuleEnum.${context.upperModuleName}_${context.upperJavaBeanName}) + "delete" #if($context.isMultiPk)$baseDeleteParam #else + "/" + ${context.javaPkName}#end), //
+				null, //
+				String.class);
+		String result = responseEntity.getBody();
+		if (result == "fail") {
+			logger.info("删除信息失败，后端删除失败!");
+		}
+		return result;
+	}
+	
+}

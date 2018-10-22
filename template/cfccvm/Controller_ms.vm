@@ -1,0 +1,165 @@
+##请编辑velocity模板
+#if(${context.moduleName})
+	#set($modulName=".${context.moduleName}")
+    #set($requestMappingVal="${context.moduleName}/${context.javaBeanNameLower}")
+#else
+	#set($moduleName="")
+    #set($requestMappingVal="${context.javaBeanNameLower}")
+#end
+package ${context.packageName}${modulName}.controller;
+
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import com.github.pagehelper.PageInfo;
+
+import ${context.packageName}${modulName}.persistence.dto.${context.javaBeanName};
+import ${context.packageName}${modulName}.service.${context.javaBeanName}Service;
+import ${context.packageName}.common.base.controller.BaseController;
+import ${context.packageName}.common.base.exception.BadRequestException;
+import ${context.packageName}.common.base.exception.NotFoundException;
+import ${context.packageName}.common.base.vo.EasyUIDatagridParam;
+import ${context.packageName}.common.base.vo.EasyUIDatagridResult;
+import ${context.packageName}.common.base.vo.PropertyFilter;
+
+/**
+ * ${context.tableDefinition.comment}Controller
+ * 
+ * @author : ${context.currentSysUserName}
+ * @version : 1.0
+ * @since : ${context.currentTimeStampStr}
+ */
+@RestController
+@RequestMapping("${requestMappingVal}")
+public class ${context.javaBeanName}Controller extends BaseController {
+
+	@Autowired
+	private ${context.javaBeanName}Service ${context.javaBeanNameLF}Service;
+    
+	/**
+	 * 获取数据列表
+	 */
+    @RequestMapping(value = "json", method = RequestMethod.GET)
+	public ResponseEntity<EasyUIDatagridResult> list(EasyUIDatagridParam param, HttpServletRequest request) {
+		List<PropertyFilter> filters = PropertyFilter.buildFromHttpRequest(request);
+		PageInfo<${context.javaBeanName}> pageInfo = ${context.javaBeanNameLF}Service.selectEasyUIPageByFilters(param, filters, ${context.javaBeanName}.class);
+		return ResponseEntity.ok(new EasyUIDatagridResult(pageInfo.getTotal(), pageInfo.getList()));
+	}
+	
+	/**
+	 * 获取全部数据列表
+	 */
+    @RequestMapping(value = "all", method = RequestMethod.GET)
+	public ResponseEntity<EasyUIDatagridResult> allList(EasyUIDatagridParam param, HttpServletRequest request) {
+		List<PropertyFilter> filters = PropertyFilter.buildFromHttpRequest(request);
+		List<${context.javaBeanName}> allList = ${context.javaBeanNameLF}Service.selectEasyUIAllByFilters(param, filters, ${context.javaBeanName}.class);
+		return ResponseEntity.ok(new EasyUIDatagridResult(allList.size(), allList));
+	}
+	
+	#if($context.isMultiPk)
+		#set($baseGetUrl="get")
+		#foreach($column in $columns)
+				#if($column.isPk)
+					#set($baseGetUrl=$baseGetUrl+"/{${column.javaFieldName}}")
+				#end
+		#end
+	#else
+		#set($baseGetUrl="get/{${context.javaPkName}}")
+	#end
+	
+	/**
+	 * 根据Id获取记录
+	 */
+	@RequestMapping(value = "$baseGetUrl", method = RequestMethod.GET)
+	public ResponseEntity<${context.javaBeanName}> get${context.javaBeanName}ById(#if($context.isMultiPk)${context.javaBeanName} ${context.javaBeanNameLF}#else @PathVariable("${context.javaPkName}") ${context.javaPkBoxType} ${context.javaPkName} #end) {
+		if (#if($context.isMultiPk) ${context.javaBeanNameLF} == null #else ${context.javaPkName} == null || StringUtils.isBlank(String.valueOf(${context.javaPkName})) #end) {
+			throw new BadRequestException(4000004);
+		}
+		${context.javaBeanName} ${context.javaBeanNameLF}Ms = #if($context.isMultiPk)${context.javaBeanNameLF}Service.selectByPrimaryKey(${context.javaBeanNameLF});#else${context.javaBeanNameLF}Service.selectByPrimaryKey(${context.javaPkName});#end
+		
+		return ResponseEntity.ok(${context.javaBeanNameLF}Ms);
+	}
+    
+	/**
+	 * 添加
+	 */
+    @RequestMapping(value = "create", method = RequestMethod.POST)
+	public ResponseEntity<String> create(@RequestBody ${context.javaBeanName} ${context.javaBeanNameLF}) {
+		if (${context.javaBeanNameLF} == null) {
+			throw new BadRequestException(4000004);
+		}
+		${context.javaBeanNameLF}Service.insert(${context.javaBeanNameLF});
+		return ResponseEntity.ok("success");
+	}
+	
+	/**
+     * 批量添加
+     */
+    @RequestMapping(value = "create/batch", method = RequestMethod.POST)
+    public ResponseEntity<String> createBatch(@RequestBody List<${context.javaBeanName}> ${context.javaBeanNameLF}List) {
+    	if(${context.javaBeanNameLF}List == null || ${context.javaBeanNameLF}List.size() == 0) {
+			throw new BadRequestException(4000004);
+		}
+    	${context.javaBeanNameLF}Service.insertList(${context.javaBeanNameLF}List);
+    	return ResponseEntity.ok("success");
+    }
+    
+	/**
+	 * 更新
+	 */
+    @RequestMapping(value = "update", method = RequestMethod.POST)
+	public ResponseEntity<String> update(@RequestBody ${context.javaBeanName} ${context.javaBeanNameLF}) {
+		if (${context.javaBeanNameLF} == null || ${context.javaBeanNameLF}.get${context.javaPkNameUpperFirstLetter}() == null) {
+			throw new BadRequestException(4000004);
+		}
+		${context.javaBeanNameLF}Service.updateByPrimaryKeySelective(${context.javaBeanNameLF});
+		return ResponseEntity.ok("success");
+	}
+	
+	/**
+     * 批量更新
+     */
+    @RequestMapping(value = "update/batch", method = RequestMethod.POST)
+    public ResponseEntity<String> updateBatch(@RequestBody List<${context.javaBeanName}> ${context.javaBeanNameLF}List) {
+    	if(${context.javaBeanNameLF}List == null || ${context.javaBeanNameLF}List.size() == 0) {
+			throw new BadRequestException(4000004);
+		}
+    	${context.javaBeanNameLF}Service.updateList(${context.javaBeanNameLF}List);
+    	return ResponseEntity.ok("success");
+    }
+	#if($context.isMultiPk)
+		#set($baseDeleteUrl="delete")
+		#foreach($column in $columns)
+				#if($column.isPk)
+					#set($baseDeleteUrl=$baseDeleteUrl+"/{${column.javaFieldName}}")
+				#end
+		#end
+	#else
+		#set($baseDeleteUrl="delete/{${context.javaPkName}}")
+	#end
+	
+	/**
+	 * 删除
+	 */
+	@RequestMapping(value = "$baseDeleteUrl")
+	public ResponseEntity<String> delete(#if($context.isMultiPk)${context.javaBeanName} ${context.javaBeanNameLF}#else @PathVariable("${context.javaPkName}") ${context.javaPkBoxType} ${context.javaPkName} #end) {
+		if (#if($context.isMultiPk) ${context.javaBeanNameLF} == null #else ${context.javaPkName} == null || StringUtils.isBlank(String.valueOf(${context.javaPkName})) #end) {
+			throw new BadRequestException(4000004);
+		}
+		#if($context.isMultiPk)${context.javaBeanNameLF}Service.deleteByPrimaryKey(${context.javaBeanNameLF});#else${context.javaBeanNameLF}Service.deleteByPrimaryKey(${context.javaPkName});#end
+
+		return ResponseEntity.ok("success");
+	}
+	
+}

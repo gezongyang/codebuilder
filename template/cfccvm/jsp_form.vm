@@ -1,0 +1,69 @@
+##请编辑velocity模板
+#if(${context.moduleName})
+	#set($modulName="${context.moduleName}")
+    #set($requestMappingVal="${context.moduleName}/${context.javaBeanNameLower}")
+#else
+	#set($moduleName="")
+    #set($requestMappingVal="${context.javaBeanNameLower}")
+#end
+#set($tempVcExpression = '$')
+#set($tempVcEntityObjName = 'entityObj')
+#set($tempVcLeftBracket = '{')
+#set($tempVcRightBracket = '}')
+<%@ page language="java" contentType="text/html; charset=${context.charset}" pageEncoding="${context.charset}"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+<title></title>
+<%@ include file="/WEB-INF/views/include/easyui.jsp"%>
+
+</head>
+<body>
+<div>
+	<form id="${context.javaBeanNameLower}_mainform" action="${ctx}/${modulName}/${context.javaBeanNameLower}/${action}" method="post">
+	#if(${context.javaPkName} == 'id')
+		<input type="hidden" name="id" value="$tempVcExpression$tempVcLeftBracket ${tempVcEntityObjName}.${context.javaPkName} $tempVcRightBracket " />
+	#end
+	#* 这里判断如果是自增类型的字段则不显示*#
+	#foreach($column in $columns)
+		#if($column.isPk && $column.isIdentity)
+			<input type="hidden" name="${column.javaFieldName}" value="$tempVcExpression$tempVcLeftBracket ${tempVcEntityObjName}.${column.javaFieldName} $tempVcRightBracket " />
+		#end
+	#end
+	
+	<table  class="formTable">
+		#foreach($column in $columns)
+			#if(${column.javaFieldName} != 'id' && !${column.isIdentity})
+			<tr>
+				<td>#if(${column.javaFieldName} == 'tsSysupdate')更新时间#else$column.comment#end：</td>
+				<td>
+				#if($column.javaType=="Date")
+					<input name="$column.javaFieldName" type="text" class="easyui-my97" readonly="readonly" datefmt="yyyy-MM-dd HH:mm:ss" data-options="width: 160#if(!$column.isNull),required:'required'#end" value="<fmt:formatDate pattern="yyyy-MM-dd HH:mm:ss" value="$tempVcExpression$tempVcLeftBracket ${tempVcEntityObjName}.${column.javaFieldName} $tempVcRightBracket" />" />
+				#elseif($column.type=="CHAR")
+					<input name="$column.javaFieldName" type="text" maxlength="${column.length}" value="$tempVcExpression$tempVcLeftBracket ${tempVcEntityObjName}.${column.javaFieldName} $tempVcRightBracket" #if($column.isPk)<c:if test="$tempVcExpression$tempVcLeftBracket action=='update' $tempVcRightBracket">style='background-color: #EBEBE4;color: #333;' readonly="readonly"</c:if>#else #end class="easyui-validatebox" data-options="width: 160#if(!$column.isNull),required:'required'#else#end,validType:['length[${column.length},${column.length}]']" />
+				#else
+                    <input name="$column.javaFieldName" type="text" maxlength="${column.length}" value="$tempVcExpression$tempVcLeftBracket ${tempVcEntityObjName}.${column.javaFieldName} $tempVcRightBracket" #if($column.isPk)<c:if test="$tempVcExpression$tempVcLeftBracket action=='update' $tempVcRightBracket">style='background-color: #EBEBE4;color: #333;' readonly="readonly"</c:if>#else #end class="easyui-validatebox" data-options="width: 160#if(!$column.isNull),required:'required'#else#end,validType:['length[0,${column.length}]']" />
+				#end
+                </td>
+            </tr>
+			#end
+		#end
+	</table>
+	</form>
+</div>
+<script type="text/javascript">
+$(function(){
+	$('#${context.javaBeanNameLower}_mainform').form({    
+	    onSubmit: function(){    
+	    	var isValid = $(this).form('validate');
+			return isValid;	// 返回false终止表单提交
+	    },    
+	    success:function(data){   
+	    	successTip(data,${context.javaBeanNameLower}_dg,${context.javaBeanNameLower}_d);
+	    }
+	}); 
+});
+
+</script>
+</body>
+</html>
